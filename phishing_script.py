@@ -62,9 +62,6 @@ def compare_image(url):
     tt = 'https://www.korbit.co.kr/sign-in/'
 
     if(score*100 >= 95.5 and m <= 300):
-        # print(url)
-        # print('score:'+str(score*100))
-        # print('m:'+str(m))
         message = '*phishing site detected : *' + url + ' (' + str(round((score*100),2)) + '%)'
         payload = {'text': message}
         requests.post(slack_url, json = payload)
@@ -72,9 +69,6 @@ def compare_image(url):
             shutil.copyfile('/home/korbit-users/phishing_scripts/phishing_tmp/tmp.png', '/home/korbit-users/phishing_scripts/phishing_tmp/'+str(score)+'.png')
 
     if(score2*100 >= 95.5 and m2 <= 300):
-        # print(url)
-        # print('score2:'+str(score2*100))
-        # print('m2:'+str(m2))
         message = '*phishing site detected : *' + url + ' (' + str(round((score2*100),2)) + '%)'
         payload = {'text': message}
         requests.post(slack_url, json = payload)
@@ -98,12 +92,9 @@ def compare_image(url):
 
 def search():
     r = requests.get('https://www.google.co.kr/search?num=50&q=korbit&cr=countryKR')
-    # r = requests.get('https://www.google.co.kr/search?num=60&q=korbit')
-    # print(r.status_code)
     time.sleep(2)
     html = r.text
     html = urllib.parse.unquote(html)
-    # print(html)
     soup = bs(html, 'html.parser')
     tmp = soup.find_all(class_='BNeawe UPmit AP7Wnd') # 2019.5.29 update
     # tmp = soup.select('div > cite') # 2018.11.1
@@ -126,13 +117,11 @@ def search():
     r3 = requests.get('https://www.google.co.kr/search?num=50&cr=countryKR&q=%EC%BD%94%EB%B9%97')
     time.sleep(3)
     html3 = r3.text
-    # print(html3)
     html3 = urllib.parse.unquote(html3)
     soup3 = bs(html3, 'html.parser') 
     tmp3 = soup.find_all(class_='BNeawe UPmit AP7Wnd')
     # tmp3 = soup3.select('div > cite')
     for k in tmp3:
-        # print(k.text)
         u = k.text.split(' ')
         if 'blockmedia' in u[0]:
             continue
@@ -144,11 +133,7 @@ def search():
             continue
         if '/' not in u[0]:
             continue
-        # print(k.text)
         urls_tmp.append(u[0])
-
-    # print(urls_tmp)
-    # urls.remove(urllib.parse.quote('https://www.korbit.co.kr/'))
 
 def save_screenshot():
     options = Options()
@@ -206,8 +191,6 @@ def save_screenshot():
             except:
                 continue
 
-    # browser.save_screenshot('/home/korbit-users/phishing_scripts/phishing_tmp/origin.png')
-    # time.sleep(2)
     browser.get('https://www.korbit.co.kr/sign-in/')
     time.sleep(5)
     browser.save_screenshot('/home/korbit-users/phishing_scripts/phishing_tmp/login.png')
@@ -218,19 +201,18 @@ def save_screenshot():
     num = 0
 
     for i in urls:
-        # num = num + 1
-        # print(num)
         i = urllib.parse.unquote(i)
-        # print(i)
         if not(http in i or https in i):
             i = 'http://'+i
 
         browser = webdriver.Chrome(executable_path='/home/korbit-users/phishing_scripts/chromedriver', options=options)
         browser.set_page_load_timeout(10) # timeout
-        # print(i)
         time.sleep(2)
         try:
             browser.get(i)
+            res = requests.get(i)
+            if res.status_code != 200:
+                continue
             time.sleep(10)
             browser.save_screenshot('/home/korbit-users/phishing_scripts/phishing_tmp/tmp.png')
             browser.quit()
@@ -247,15 +229,9 @@ if __name__=='__main__':
         # pass
 
     try:
-        # print('go')
         search()
-    # f = open('/home/korbit-users/phishing_scripts/pre_urls.txt','r')
-    # pre_urls = f.read().split('\n')
-    # urls = urls + pre_urls
         urls_tmp = set(urls_tmp)
         urls = list(urls_tmp)
-        # print(urls)
-    # print(urls)
         save_screenshot()
     except Exception as e:
         print(str(e))
